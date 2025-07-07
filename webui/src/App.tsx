@@ -8,7 +8,7 @@ import type { Session } from "@supabase/supabase-js";
 
 /**
  * Flow
- * 0. getSession() checks localStoreage returns null, so we stay on the login form
+ * 0. getSession() checks localStoreage returns null, so we stay on the login form`
  * 1. User fils out login form -> Rendered by <Auth> component
  * 2. User clicks login -> <Auth> component calls supabase auth methods internally
  * 3. Supabase authenticates -> makes api call to supabase servers
@@ -59,8 +59,8 @@ function App() {
     // setup a listener for auth state changes (login / logout) and update session state when changes occur
     const {
       data: { subscription },
-    } = supabase.auth
-    .onAuthStateChange((_event, session) => { // listes to <Auth> component
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      // listes to <Auth> component
       setSession(session);
       if (session?.user?.identities) {
         setUserDisplayName(session.user.identities[0].identity_data?.full_name);
@@ -71,11 +71,26 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    console.log('signout error repsonse', error);
+  }
+
   // if the users session is successful return the 'protected' component
   if (!session) {
     return <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />;
   } else {
-    return <div>Logged in! Welcome {userDisplayName} </div>;
+    return (
+      <div>
+        Logged in! Welcome {userDisplayName}
+        <div>
+          {JSON.stringify(session)}
+        </div>
+        <div>
+          <button onClick={signOut}>Sign out</button>
+        </div>
+      </div>
+    );
   }
 }
 
